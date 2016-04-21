@@ -24,6 +24,8 @@
         <module>cmd-list</module>
         <module>cmd-send</module>
         <module>cmd-server</module>
+        <module>cmd-csend</module>
+        <module>cmd-category</module>
         <module>reconnect-yaml</module>
     </modules>
 

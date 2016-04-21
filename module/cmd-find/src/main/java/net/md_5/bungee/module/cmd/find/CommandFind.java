@@ -28,7 +28,7 @@ public class CommandFind extends PlayerCommand
                 sender.sendMessage( ChatColor.RED + "That user is not online" );
             } else
             {
-                sender.sendMessage( ChatColor.BLUE + args[0] + " is online at " + player.getServer().getInfo().getName() );
+                sender.sendMessage( ChatColor.BLUE + args[0] + " is online in " + player.getServer().getInfo().getCategory().getName() + " at " + player.getServer().getInfo().getName() );
             }
         }
     }

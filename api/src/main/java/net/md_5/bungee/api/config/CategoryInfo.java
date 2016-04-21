@@ -6,8 +6,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Preconditions;
+
 import lombok.Getter;
 import lombok.Synchronized;
+import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.util.MapUtils;
 
@@ -27,6 +30,7 @@ public class CategoryInfo {
 	 * All servers which are part of the category.
 	 */
 	private Map<ServerInfo, Integer> servers;
+	private boolean serversChanged;
 	
 	private final Collection<ProxiedPlayer> players = new ArrayList<>();
     
@@ -37,22 +41,27 @@ public class CategoryInfo {
 	
 	@Synchronized("servers")
     public int removeServer(ServerInfo server) {
+		serversChanged = true;
 		return this.servers.remove(server);
 	}
 	
 	@Synchronized("servers")
     public void putServer(ServerInfo server) {
+		serversChanged = true;
 		this.servers.put(server, server.getPlayers().size());
-		this.servers = MapUtils.sortByValue(this.servers);
 	}
 	
 	@Synchronized("servers")
     public ServerInfo getServer() {
-		return this.servers.keySet().iterator().next();
+		return getServers().iterator().next();
 	}
 	
 	@Synchronized("servers")
     public Set<ServerInfo> getServers() {
+		if (serversChanged) {
+			this.servers = MapUtils.sortByValue(this.servers);
+			serversChanged = false;
+		}
 		return this.servers.keySet();
 	}
 	
@@ -69,4 +78,17 @@ public class CategoryInfo {
     public Collection<ProxiedPlayer> getPlayers() {
     	return players;
     }
+	
+
+    /**
+     * Whether the player can access this category. It will return false when
+     * the player has no permission.
+     *
+     * @param player the player to check access for
+     * @return whether access is granted to this server
+     */
+	public boolean canAccess(CommandSender player) {
+		Preconditions.checkNotNull( player, "player" );
+		return player.hasPermission( "bungeecord.category." + name );
+	}
 }
