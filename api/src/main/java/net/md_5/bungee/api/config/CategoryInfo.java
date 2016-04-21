@@ -47,8 +47,13 @@ public class CategoryInfo {
 	
 	@Synchronized("servers")
     public void putServer(ServerInfo server) {
+		putServer(server, server.getPlayers().size());
+	}
+	
+	@Synchronized("servers")
+    public void putServer(ServerInfo server, int players) {
 		serversChanged = true;
-		this.servers.put(server, server.getPlayers().size());
+		this.servers.put(server, players);
 	}
 	
 	@Synchronized("servers")
@@ -90,5 +95,13 @@ public class CategoryInfo {
 	public boolean canAccess(CommandSender player) {
 		Preconditions.checkNotNull( player, "player" );
 		return player.hasPermission( "bungeecord.category." + name );
+	}
+	
+	public String dump() {
+		String msg = getName() + " (" +getType() + ")/n";
+		msg += "Servers\n";
+		for (ServerInfo server : getServers())
+			msg += "\t- " + server.getName() + " (" + servers.get(server) + ")\n";
+		return msg;
 	}
 }

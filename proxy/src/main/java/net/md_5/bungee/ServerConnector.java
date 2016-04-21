@@ -206,8 +206,9 @@ public class ServerConnector extends PacketHandler
             user.unsafe().sendPacket( new PluginMessage( "MC|Brand", brand.array().clone(), handshakeHandler.isServerForge() ) );
             brand.release();
             
-            CategoryInfo newCategory = server.getInfo().getCategory();
+            CategoryInfo newCategory = target.getCategory();
             newCategory.getPlayers().add(user);
+            newCategory.putServer(target, target.getPlayers().size() + 1);
             bungee.getPluginManager().callEvent(new CategoryJoinEvent(user, newCategory));
         } else
         {
@@ -246,9 +247,13 @@ public class ServerConnector extends PacketHandler
             CategoryInfo oldCategory = currentServer.getCategory();
             CategoryInfo newCategory = server.getInfo().getCategory();
             
+            // always update servers for load balancing
+            oldCategory.putServer(currentServer, currentServer.getPlayers().size() - 1);
+            newCategory.putServer(target, target.getPlayers().size() + 1);
+            
             if (!oldCategory.equals(newCategory)) {
             	oldCategory.getPlayers().remove(user);
-                newCategory.getPlayers().add(user);
+            	newCategory.getPlayers().add(user);
                 
                 bungee.getPluginManager().callEvent(new CategoryLeaveEvent(user, oldCategory));
                 bungee.getPluginManager().callEvent(new CategoryJoinEvent(user, newCategory));

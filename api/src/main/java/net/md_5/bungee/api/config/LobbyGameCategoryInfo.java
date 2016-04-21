@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class LobbyGameCategoryInfo extends CategoryInfo {
 
@@ -86,5 +87,18 @@ public class LobbyGameCategoryInfo extends CategoryInfo {
 	 */
 	synchronized public ServerInfo getGameServer(String map) {
 		return getDeque(map).peekFirst();
+	}
+	
+	@Override
+	public String dump() {
+		String msg = super.dump();
+		
+		for (Entry<String, Deque<ServerInfo>> entry : waitingGameServers.entrySet()) {
+			msg += entry.getKey() + "\n";
+			
+			for (ServerInfo server : entry.getValue())
+				msg += "\t- " + server.getName() + "\n";
+		}
+		return msg;
 	}
 }
