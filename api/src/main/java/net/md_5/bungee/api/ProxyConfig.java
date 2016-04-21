@@ -1,7 +1,7 @@
 package net.md_5.bungee.api;
 
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ListenerInfo;
-import net.md_5.bungee.api.config.ServerInfo;
 
 import java.util.Collection;
 import java.util.Map;
@@ -31,9 +31,9 @@ public interface ProxyConfig
     Collection<ListenerInfo> getListeners();
 
     /**
-     * Set of all servers.
+     * Set of all server categories.
      */
-    Map<String, ServerInfo> getServers();
+    Map<String, CategoryInfo> getCategories();
 
     /**
      * Does the server authenticate with mojang

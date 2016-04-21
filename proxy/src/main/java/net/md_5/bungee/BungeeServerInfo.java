@@ -15,12 +15,14 @@ import java.util.LinkedList;
 import java.util.Queue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.Synchronized;
 import lombok.ToString;
 import net.md_5.bungee.api.Callback;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.ServerPing;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
@@ -33,13 +35,23 @@ import net.md_5.bungee.protocol.packet.PluginMessage;
 @RequiredArgsConstructor
 @ToString(of =
 {
-    "name", "address", "restricted"
+    "name", "category", "address", "restricted"
 })
 public class BungeeServerInfo implements ServerInfo
 {
 
     @Getter
     private final String name;
+    @Getter
+    final private CategoryInfo category;
+    @Getter
+    final private ServerType serverType;
+    @Getter
+    @Setter
+    private String map;
+    @Getter
+    @Setter
+    private long timestamp;
     @Getter
     private final InetSocketAddress address;
     private final Collection<ProxiedPlayer> players = new ArrayList<>();

@@ -67,9 +67,11 @@ import lombok.Synchronized;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.ReconnectHandler;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ConfigurationAdapter;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.config.ServerInfo.ServerType;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
@@ -154,7 +156,8 @@ public class BungeeCord extends ProxyServer
     @Getter
     private ConnectionThrottle connectionThrottle;
     private final ModuleManager moduleManager = new ModuleManager();
-
+    @Getter
+    final private Map<String, ServerInfo> servers = new HashMap<>();
     
     {
         // TODO: Proper fallback when we interface the manager
@@ -547,11 +550,15 @@ public class BungeeCord extends ProxyServer
     }
 
     @Override
-    public Map<String, ServerInfo> getServers()
-    {
-        return config.getServers();
+    public Map<String, CategoryInfo> getCategories() {
+    	return config.getCategories();
     }
-
+    
+    @Override
+    public CategoryInfo getCategeoryInfo(String name) {
+    	return getCategories().get(name);
+    }
+    
     @Override
     public ServerInfo getServerInfo(String name)
     {
@@ -597,9 +604,9 @@ public class BungeeCord extends ProxyServer
     }
 
     @Override
-    public ServerInfo constructServerInfo(String name, InetSocketAddress address, String motd, boolean restricted)
+    public ServerInfo constructServerInfo(String name, CategoryInfo category, ServerType type, InetSocketAddress address, String motd, boolean restricted)
     {
-        return new BungeeServerInfo( name, address, motd, restricted );
+        return new BungeeServerInfo( name, category, type, address, motd, restricted );
     }
 
     @Override

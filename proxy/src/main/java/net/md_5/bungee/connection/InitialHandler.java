@@ -24,6 +24,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.PendingConnection;
@@ -193,7 +194,8 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     {
         Preconditions.checkState( thisState == State.STATUS, "Not expecting STATUS" );
 
-        ServerInfo forced = AbstractReconnectHandler.getForcedHost( this );
+        CategoryInfo forcedCategory = AbstractReconnectHandler.getForcedHost( this );
+        ServerInfo forced = forcedCategory != null ? forcedCategory.getServer() : null;
         final String motd = ( forced != null ) ? forced.getMotd() : listener.getMotd();
 
         Callback<ServerPing> pingBack = new Callback<ServerPing>()
@@ -484,20 +486,16 @@ public class InitialHandler extends PacketHandler implements PendingConnection
 
                             ch.getHandle().pipeline().get( HandlerBoss.class ).setHandler( new UpstreamBridge( bungee, userCon ) );
                             bungee.getPluginManager().callEvent( new PostLoginEvent( userCon ) );
-                            ServerInfo server;
+                            CategoryInfo category;
                             if ( bungee.getReconnectHandler() != null )
-                            {
-                                server = bungee.getReconnectHandler().getServer( userCon );
-                            } else
-                            {
-                                server = AbstractReconnectHandler.getForcedHost( InitialHandler.this );
-                            }
-                            if ( server == null )
-                            {
-                                server = bungee.getServerInfo( listener.getDefaultServer() );
-                            }
+                            	category = bungee.getReconnectHandler().getCategory( userCon );
+                            else
+                            	category = AbstractReconnectHandler.getForcedHost( InitialHandler.this );
+                            if ( category == null )
+                            	category = bungee.getCategeoryInfo(listener.getDefaultCategory() );
 
-                            userCon.connect( server, null, true );
+                            
+                            userCon.connectToCategory( category, null, true );
 
                             thisState = State.FINISHED;
                         }

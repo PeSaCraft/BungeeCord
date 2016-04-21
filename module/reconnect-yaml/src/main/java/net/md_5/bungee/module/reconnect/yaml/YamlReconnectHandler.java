@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.util.CaseInsensitiveMap;
@@ -53,27 +54,27 @@ public class YamlReconnectHandler extends AbstractReconnectHandler
     }
 
     @Override
-    protected ServerInfo getStoredServer(ProxiedPlayer player)
+    protected CategoryInfo getStoredCategory(ProxiedPlayer player)
     {
-        ServerInfo server = null;
+        CategoryInfo category = null;
         lock.readLock().lock();
         try
         {
-            server = ProxyServer.getInstance().getServerInfo( data.get( key( player ) ) );
+        	category = ProxyServer.getInstance().getCategeoryInfo( data.get( key( player ) ) );
         } finally
         {
             lock.readLock().unlock();
         }
-        return server;
+        return category;
     }
 
     @Override
-    public void setServer(ProxiedPlayer player)
+    public void setCategory(ProxiedPlayer player)
     {
         lock.writeLock().lock();
         try
         {
-            data.put( key( player ), ( player.getReconnectServer() != null ) ? player.getReconnectServer().getName() : player.getServer().getInfo().getName() );
+            data.put( key( player ), ( player.getReconnectCategory() != null ) ? player.getReconnectCategory().getName() : player.getServer().getInfo().getCategory().getName() );
         } finally
         {
             lock.writeLock().unlock();

@@ -15,8 +15,10 @@ import net.md_5.bungee.api.event.TabCompleteResponseEvent;
 import net.md_5.bungee.UserConnection;
 import net.md_5.bungee.Util;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.CategoryLeaveEvent;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.ServerKickEvent;
 import net.md_5.bungee.api.score.Objective;
@@ -58,8 +60,11 @@ public class DownstreamBridge extends PacketHandler
             return;
         }
 
-        ServerInfo def = bungee.getServerInfo( con.getPendingConnection().getListener().getFallbackServer() );
-        if ( server.getInfo() != def )
+        CategoryInfo category = bungee.getCategeoryInfo( con.getPendingConnection().getListener().getFallbackCategory() );
+        
+        ServerInfo def = category != null ? category.getServer() : null;
+        
+        if ( def != null && server.getInfo() != def )
         {
             server.setObsolete( true );
             con.connectNow( def );
@@ -77,7 +82,7 @@ public class DownstreamBridge extends PacketHandler
         server.getInfo().removePlayer( con );
         if ( bungee.getReconnectHandler() != null )
         {
-            bungee.getReconnectHandler().setServer( con );
+            bungee.getReconnectHandler().setCategory( con );
         }
 
         if ( !server.isObsolete() )
@@ -448,19 +453,12 @@ public class DownstreamBridge extends PacketHandler
     @Override
     public void handle(Kick kick) throws Exception
     {
-        ServerInfo def = bungee.getServerInfo( con.getPendingConnection().getListener().getFallbackServer() );
-        if ( Objects.equal( server.getInfo(), def ) )
-        {
-            def = null;
-        }
-        ServerKickEvent event = bungee.getPluginManager().callEvent( new ServerKickEvent( con, server.getInfo(), ComponentSerializer.parse( kick.getMessage() ), def, ServerKickEvent.State.CONNECTED ) );
-        if ( event.isCancelled() && event.getCancelServer() != null )
-        {
-            con.connectNow( event.getCancelServer() );
-        } else
-        {
+    	CategoryInfo category = bungee.getCategeoryInfo( con.getPendingConnection().getListener().getFallbackCategory() );
+        ServerKickEvent event = bungee.getPluginManager().callEvent( new ServerKickEvent( con, server.getInfo(), ComponentSerializer.parse( kick.getMessage() ), category, ServerKickEvent.State.CONNECTED ) );
+        if ( event.isCancelled() && event.getCancelCategory() != null && event.getCancelCategory().getServer() != null )
+            con.connectNow( event.getCancelCategory().getServer() );
+        else
             con.disconnect0( event.getKickReasonComponent() ); // TODO: Prefix our own stuff.
-        }
         server.setObsolete( true );
         throw CancelSendSignal.INSTANCE;
     }

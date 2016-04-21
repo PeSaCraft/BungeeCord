@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Cancellable;
@@ -37,9 +38,9 @@ public class ServerKickEvent extends Event implements Cancellable
      */
     private BaseComponent[] kickReasonComponent;
     /**
-     * Server to send player to if this event is cancelled.
+     * Category to send player to if this event is cancelled.
      */
-    private ServerInfo cancelServer;
+    private CategoryInfo cancelCategory;
     /**
      * State in which the kick occured.
      */
@@ -52,23 +53,23 @@ public class ServerKickEvent extends Event implements Cancellable
     }
 
     @Deprecated
-    public ServerKickEvent(ProxiedPlayer player, BaseComponent[] kickReasonComponent, ServerInfo cancelServer)
+    public ServerKickEvent(ProxiedPlayer player, BaseComponent[] kickReasonComponent, CategoryInfo cancelCategory)
     {
-        this( player, kickReasonComponent, cancelServer, State.UNKNOWN );
+        this( player, kickReasonComponent, cancelCategory, State.UNKNOWN );
     }
 
     @Deprecated
-    public ServerKickEvent(ProxiedPlayer player, BaseComponent[] kickReasonComponent, ServerInfo cancelServer, State state)
+    public ServerKickEvent(ProxiedPlayer player, BaseComponent[] kickReasonComponent, CategoryInfo cancelCategory, State state)
     {
-        this( player, player.getServer().getInfo(), kickReasonComponent, cancelServer, state );
+        this( player, player.getServer().getInfo(), kickReasonComponent, cancelCategory, state );
     }
 
-    public ServerKickEvent(ProxiedPlayer player, ServerInfo kickedFrom, BaseComponent[] kickReasonComponent, ServerInfo cancelServer, State state)
+    public ServerKickEvent(ProxiedPlayer player, ServerInfo kickedFrom, BaseComponent[] kickReasonComponent, CategoryInfo cancelCategory, State state)
     {
         this.player = player;
         this.kickedFrom = kickedFrom;
         this.kickReasonComponent = kickReasonComponent;
-        this.cancelServer = cancelServer;
+        this.cancelCategory = cancelCategory;
         this.state = state;
     }
 

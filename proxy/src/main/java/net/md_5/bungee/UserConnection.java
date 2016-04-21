@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
@@ -33,8 +32,10 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.Title;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.CategorySwitchEvent;
 import net.md_5.bungee.api.event.PermissionCheckEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.score.Scoreboard;
@@ -59,8 +60,6 @@ import net.md_5.bungee.protocol.packet.Kick;
 import net.md_5.bungee.protocol.packet.PlayerListHeaderFooter;
 import net.md_5.bungee.protocol.packet.PluginMessage;
 import net.md_5.bungee.protocol.packet.SetCompression;
-import net.md_5.bungee.tab.Global;
-import net.md_5.bungee.tab.GlobalPing;
 import net.md_5.bungee.tab.ServerUnique;
 import net.md_5.bungee.tab.TabList;
 import net.md_5.bungee.util.CaseInsensitiveSet;
@@ -100,7 +99,7 @@ public final class UserConnection implements ProxiedPlayer
     private int ping = 100;
     @Getter
     @Setter
-    private ServerInfo reconnectServer;
+    private CategoryInfo reconnectCategory;
     @Getter
     private TabList tabListHandler;
     @Getter
@@ -108,9 +107,9 @@ public final class UserConnection implements ProxiedPlayer
     private int gamemode;
     @Getter
     private int compressionThreshold = -1;
-    // Used for trying multiple servers in order
+    // Used for trying multiple categories in order
     @Setter
-    private Queue<String> serverJoinQueue;
+    private Queue<String> categoryJoinQueue;
     /*========================================================================*/
     private final Collection<String> groups = new CaseInsensitiveSet();
     private final Collection<String> permissions = new CaseInsensitiveSet();
@@ -204,6 +203,20 @@ public final class UserConnection implements ProxiedPlayer
     }
 
     @Override
+	public void connectToCategory(CategoryInfo target) {
+    	connect(target.getServer());
+	}
+
+	@Override
+	public void connectToCategory(CategoryInfo target, Callback<Boolean> callback) {
+		connect(target.getServer(), callback);
+	}
+	
+	public void connectToCategory(CategoryInfo target, final Callback<Boolean> callback, final boolean retry) {
+		connect(target.getServer(), callback, retry);
+	}
+	
+    @Override
     public void connect(ServerInfo target)
     {
         connect( target, null );
@@ -230,23 +243,21 @@ public final class UserConnection implements ProxiedPlayer
 
     public ServerInfo updateAndGetNextServer(ServerInfo currentTarget)
     {
-        if ( serverJoinQueue == null )
+        if ( categoryJoinQueue == null )
         {
-            serverJoinQueue = new LinkedList<>( getPendingConnection().getListener().getServerPriority() );
+            categoryJoinQueue = new LinkedList<>( getPendingConnection().getListener().getCategoryPriority() );
         }
 
-        ServerInfo next = null;
-        while ( !serverJoinQueue.isEmpty() )
+        while ( !categoryJoinQueue.isEmpty() )
         {
-            ServerInfo candidate = ProxyServer.getInstance().getServerInfo( serverJoinQueue.remove() );
-            if ( !Objects.equal( currentTarget, candidate ) )
-            {
-                next = candidate;
-                break;
-            }
+            CategoryInfo candidateCategory = ProxyServer.getInstance().getCategeoryInfo( categoryJoinQueue.remove() );
+            
+            for (ServerInfo server : candidateCategory.getServers())
+	            if ( !Objects.equal( currentTarget, server ) )
+	               return server;
         }
 
-        return next;
+        return null;
     }
 
     public void connect(ServerInfo info, final Callback<Boolean> callback, final boolean retry)

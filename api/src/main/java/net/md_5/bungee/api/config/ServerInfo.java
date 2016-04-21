@@ -13,6 +13,12 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 public interface ServerInfo
 {
 
+	public static enum ServerType {
+		LOBBY,
+		GAME,
+		DIRECT;
+	}
+	
     /**
      * Get the name of this server.
      *
@@ -42,7 +48,35 @@ public interface ServerInfo
      * @return the motd
      */
     String getMotd();
-
+    
+    /**
+     * Return the category which this server belongs to.
+     * 
+     * @return the category info
+     */
+    CategoryInfo getCategory();
+    
+    /**
+     * Return the type of this server
+     * 
+     * @return the server's type
+     */
+    ServerType getServerType();
+    
+    /**
+     * Set the map of this server.
+     * 
+     * @param map the map to set
+     */
+    void setMap(String map);
+    
+    /**
+     * Return the map of this server or null if not set
+     * 
+     * @return the server's map
+     */
+    String getMap();
+    
     /**
      * Whether the player can access this server. It will only return false when
      * the player has no permission and this server is restricted.
@@ -80,4 +114,18 @@ public interface ServerInfo
      * @param callback the callback to call when the count has been retrieved.
      */
     void ping(Callback<ServerPing> callback);
+    
+    /**
+     * Set the timestamp when the server reacted last time.
+     * 
+     * @param timestamp the timestamp to set
+     */
+    void setTimestamp(long timestamp);
+    
+    /**
+     * Return the timestamp the server reacted last time.
+     * 
+     * @return the server's timestamp
+     */
+    long getTimestamp();
 }

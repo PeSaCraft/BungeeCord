@@ -5,7 +5,9 @@ import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.UserConnection;
 import net.md_5.bungee.Util;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.CategoryLeaveEvent;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PluginMessageEvent;
@@ -55,7 +57,7 @@ public class UpstreamBridge extends PacketHandler
         bungee.getPluginManager().callEvent( event );
         con.getTabListHandler().onDisconnect();
         BungeeCord.getInstance().removeConnection( con );
-
+        
         if ( con.getServer() != null )
         {
             // Manually remove from everyone's tab list
@@ -76,6 +78,11 @@ public class UpstreamBridge extends PacketHandler
             {
                 player.unsafe().sendPacket( packet );
             }
+            
+            CategoryInfo category = con.getServer().getInfo().getCategory();
+            category.getPlayers().remove(con);
+            bungee.getPluginManager().callEvent(new CategoryLeaveEvent(con, category));
+
             con.getServer().disconnect( "Quitting" );
         }
     }

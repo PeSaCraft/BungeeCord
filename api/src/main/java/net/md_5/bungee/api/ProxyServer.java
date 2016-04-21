@@ -10,8 +10,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 import lombok.Getter;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ConfigurationAdapter;
 import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.config.ServerInfo.ServerType;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.TaskScheduler;
@@ -88,9 +90,26 @@ public abstract class ProxyServer
     public abstract ProxiedPlayer getPlayer(UUID uuid);
 
     /**
-     * Return all servers registered to this proxy, keyed by name. Unlike the
-     * methods in {@link ConfigurationAdapter#getServers()}, this will not
-     * return a fresh map each time.
+     * Return all categories registered to this proxy, keyed by name. Unlike
+     * the methods in {@link ConfigurationAdapter#getCategories()}, this will
+     * not return a fresh map each time.
+     * 
+     * @return all registered categories
+     */
+    public abstract Map<String, CategoryInfo> getCategories();
+
+    /**
+     * Gets the category info of a category.
+     *
+     * @param name the name of the configured category
+     * @return the category info belonging to the specified category
+     */
+    public abstract CategoryInfo getCategeoryInfo(String name);
+    
+    /**
+     * Return all servers registered to this proxy, keyed by name.
+     * This is the only available map and should be used to add
+     * and remove servers.
      *
      * @return all registered remote server destinations
      */
@@ -205,12 +224,14 @@ public abstract class ProxyServer
      * instance.
      *
      * @param name name of the server
+     * @param category category of the server
+     * @param type type of the server
      * @param address connectable Minecraft address + port of the server
      * @param motd the motd when used as a forced server
      * @param restricted whether the server info restricted property will be set
      * @return the constructed instance
      */
-    public abstract ServerInfo constructServerInfo(String name, InetSocketAddress address, String motd, boolean restricted);
+    public abstract ServerInfo constructServerInfo(String name, CategoryInfo category, ServerType type, InetSocketAddress address, String motd, boolean restricted);
 
     /**
      * Returns the console overlord for this proxy. Being the console, this

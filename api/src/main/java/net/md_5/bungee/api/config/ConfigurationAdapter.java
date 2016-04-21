@@ -53,11 +53,12 @@ public interface ConfigurationAdapter
     public Collection<?> getList(String path, Collection<?> def);
 
     /**
-     * Get the configuration all servers which may be accessible via the proxy.
-     *
-     * @return all accessible servers, keyed by name
+     * Get the configuration all categories which may be accessible via the proxy.
+     * The map will be recreated on every request.
+     * 
+     * @return all accessible categories, keyed by name
      */
-    public Map<String, ServerInfo> getServers();
+    public Map<String, CategoryInfo> getCategories();
 
     /**
      * Get information about all hosts to bind the proxy to.

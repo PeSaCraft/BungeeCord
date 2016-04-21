@@ -21,9 +21,13 @@ import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.Util;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ConfigurationAdapter;
 import net.md_5.bungee.api.config.ListenerInfo;
+import net.md_5.bungee.api.config.LobbyGameCategoryInfo;
 import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.config.CategoryInfo.CategoryType;
+import net.md_5.bungee.api.config.ServerInfo.ServerType;
 import net.md_5.bungee.util.CaseInsensitiveMap;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -189,22 +193,28 @@ public class YamlConfig implements ConfigurationAdapter
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Map<String, ServerInfo> getServers()
+    public Map<String, CategoryInfo> getCategories()
     {
-        Map<String, Map<String, Object>> base = get( "servers", (Map) Collections.singletonMap( "lobby", new HashMap<>() ) );
-        Map<String, ServerInfo> ret = new HashMap<>();
+        Map<String, String> base = get("categories", Collections.singletonMap("lobby", CategoryType.DIRECT.toString()));
+        Map<String, CategoryInfo> ret = new HashMap<>();
 
-        for ( Map.Entry<String, Map<String, Object>> entry : base.entrySet() )
+        for (Map.Entry<String, String> category : base.entrySet())
         {
-            Map<String, Object> val = entry.getValue();
-            String name = entry.getKey();
-            String addr = get( "address", "localhost:25565", val );
-            String motd = ChatColor.translateAlternateColorCodes( '&', get( "motd", "&1Just another BungeeCord - Forced Host", val ) );
-            boolean restricted = get( "restricted", false, val );
-            InetSocketAddress address = Util.getAddr( addr );
-            ServerInfo info = ProxyServer.getInstance().constructServerInfo( name, address, motd, restricted );
-            ret.put( name, info );
+        	String name = category.getKey();
+        	CategoryType type = CategoryType.valueOf(category.getValue());
+        	
+        	CategoryInfo info = null;
+        	
+        	switch (type) {
+			case DIRECT:
+				info = new CategoryInfo(name);
+				break;
+			case LOBBY_GAME:
+				info = new LobbyGameCategoryInfo(name);
+				break;
+        	}
+        	if (info != null)
+        		ret.put( name, info );
         }
 
         return ret;
@@ -251,17 +261,17 @@ public class YamlConfig implements ConfigurationAdapter
 
             // Default server list migration
             // TODO: Remove from submap
-            String defaultServer = get( "default_server", null, val );
-            String fallbackServer = get( "fallback_server", null, val );
-            if ( defaultServer != null )
+            String defaultCategory = get( "default_category", null, val );
+            String fallbackCategory = get( "fallback_category", null, val );
+            if ( defaultCategory != null )
             {
-                serverPriority.add( defaultServer );
-                set( "default_server", null, val );
+                serverPriority.add( defaultCategory );
+                set( "default_category", null, val );
             }
-            if ( fallbackServer != null )
+            if ( fallbackCategory != null )
             {
-                serverPriority.add( fallbackServer );
-                set( "fallback_server", null, val );
+                serverPriority.add( fallbackCategory );
+                set( "fallback_category", null, val );
             }
 
             // Add defaults if required

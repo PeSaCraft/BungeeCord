@@ -32,17 +32,17 @@ public class ListenerInfo
      */
     private final int tabListSize;
     /**
-     * List of servers in order of join attempt. First attempt is the first
+     * List of categories in order of join attempt. First attempt is the first
      * element, second attempt is the next element, etc etc.
      */
-    private final List<String> serverPriority;
+    private final List<String> categoryPriority;
     /**
      * Whether reconnect locations will be used, or else the user is simply
      * transferred to the default server on connect.
      */
     private final boolean forceDefault;
     /**
-     * A list of host to server name mappings which will force a user to be
+     * A list of host to category name mappings which will force a user to be
      * transferred depending on the host they connect to.
      */
     private final Map<String, String> forcedHosts;
@@ -69,27 +69,27 @@ public class ListenerInfo
     private final boolean queryEnabled;
 
     /**
-     * Gets the highest priority server to join.
+     * Gets the highest priority category to join.
      *
-     * @return default server
-     * @deprecated replaced by {@link #serverPriority}
+     * @return default category
+     * @deprecated replaced by {@link #categoryPriority}
      */
     @Deprecated
-    public String getDefaultServer()
+    public String getDefaultCategory()
     {
-        return serverPriority.get( 0 );
+        return categoryPriority.get( 0 );
     }
 
     /**
-     * Gets the second highest priority server to join, or else the highest
+     * Gets the second highest priority category to join, or else the highest
      * priority.
      *
-     * @return fallback server
-     * @deprecated replaced by {@link #serverPriority}
+     * @return fallback category
+     * @deprecated replaced by {@link #categoryPriority}
      */
     @Deprecated
-    public String getFallbackServer()
+    public String getFallbackCategory()
     {
-        return ( serverPriority.size() > 1 ) ? serverPriority.get( 1 ) : getDefaultServer();
+        return ( categoryPriority.size() > 1 ) ? categoryPriority.get( 1 ) : getDefaultCategory();
     }
 }

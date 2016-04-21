@@ -14,6 +14,7 @@ import lombok.Getter;
 import net.md_5.bungee.api.Favicon;
 import net.md_5.bungee.api.ProxyConfig;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ConfigurationAdapter;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -40,9 +41,9 @@ public class Configuration implements ProxyConfig
      */
     private Collection<ListenerInfo> listeners;
     /**
-     * Set of all servers.
+     * Set of all categories.
      */
-    private TMap<String, ServerInfo> servers;
+    private TMap<String, CategoryInfo> categories;
     /**
      * Should we check minecraft.net auth.
      */
@@ -89,44 +90,40 @@ public class Configuration implements ProxyConfig
 
         Preconditions.checkArgument( listeners != null && !listeners.isEmpty(), "No listeners defined." );
 
-        Map<String, ServerInfo> newServers = adapter.getServers();
-        Preconditions.checkArgument( newServers != null && !newServers.isEmpty(), "No servers defined" );
+        Map<String, CategoryInfo> newCategories = adapter.getCategories();
+        Preconditions.checkArgument( newCategories != null && !newCategories.isEmpty(), "No servers defined" );
 
-        if ( servers == null )
+        if ( categories == null )
         {
-            servers = new CaseInsensitiveMap<>( newServers );
+        	categories = new CaseInsensitiveMap<>( newCategories );
         } else
         {
-            for ( ServerInfo oldServer : servers.values() )
+            for ( CategoryInfo oldCategory : categories.values() )
             {
                 // Don't allow servers to be removed
-                Preconditions.checkArgument( newServers.containsKey( oldServer.getName() ), "Server %s removed on reload!", oldServer.getName() );
+                Preconditions.checkArgument( newCategories.containsKey( oldCategory.getName() ), "Category %s removed on reload!", oldCategory.getName() );
             }
 
             // Add new servers
-            for ( Map.Entry<String, ServerInfo> newServer : newServers.entrySet() )
+            for ( Map.Entry<String, CategoryInfo> newCategory : newCategories.entrySet() )
             {
-                if ( !servers.containsValue( newServer.getValue() ) )
+                if ( !categories.containsValue( newCategory.getValue() ) )
                 {
-                    servers.put( newServer.getKey(), newServer.getValue() );
+                    categories.put( newCategory.getKey(), newCategory.getValue() );
                 }
             }
         }
 
         for ( ListenerInfo listener : listeners )
         {
-            for ( int i = 0; i < listener.getServerPriority().size(); i++ )
+            for ( int i = 0; i < listener.getCategoryPriority().size(); i++ )
             {
-                String server = listener.getServerPriority().get( i );
-                Preconditions.checkArgument( servers.containsKey( server ), "Server %s (priority %s) is not defined", server, i );
+                String category = listener.getCategoryPriority().get( i );
+                Preconditions.checkArgument( categories.containsKey( category ), "Category %s (priority %s) is not defined", category, i );
             }
-            for ( String server : listener.getForcedHosts().values() )
-            {
-                if ( !servers.containsKey( server ) )
-                {
-                    ProxyServer.getInstance().getLogger().log( Level.WARNING, "Forced host server {0} is not defined", server );
-                }
-            }
+            for ( String category : listener.getForcedHosts().values() )
+                if ( !categories.containsKey( category ) )
+                    ProxyServer.getInstance().getLogger().log( Level.WARNING, "Forced host category {0} is not defined", category );
         }
     }
 

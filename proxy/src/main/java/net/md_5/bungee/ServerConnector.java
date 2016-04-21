@@ -11,7 +11,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.event.CategoryJoinEvent;
+import net.md_5.bungee.api.event.CategoryLeaveEvent;
+import net.md_5.bungee.api.event.CategorySwitchEvent;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.event.ServerKickEvent;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
@@ -201,6 +205,10 @@ public class ServerConnector extends PacketHandler
             DefinedPacket.writeString( bungee.getName() + " (" + bungee.getVersion() + ")", brand );
             user.unsafe().sendPacket( new PluginMessage( "MC|Brand", brand.array().clone(), handshakeHandler.isServerForge() ) );
             brand.release();
+            
+            CategoryInfo newCategory = server.getInfo().getCategory();
+            newCategory.getPlayers().add(user);
+            bungee.getPluginManager().callEvent(new CategoryJoinEvent(user, newCategory));
         } else
         {
             user.getServer().setObsolete( true );
@@ -231,6 +239,21 @@ public class ServerConnector extends PacketHandler
 
             // Remove from old servers
             user.getServer().disconnect( "Quitting" );
+            
+            // check if category changed and call event
+            ServerInfo currentServer = user.getServer().getInfo();
+            
+            CategoryInfo oldCategory = currentServer.getCategory();
+            CategoryInfo newCategory = server.getInfo().getCategory();
+            
+            if (!oldCategory.equals(newCategory)) {
+            	oldCategory.getPlayers().remove(user);
+                newCategory.getPlayers().add(user);
+                
+                bungee.getPluginManager().callEvent(new CategoryLeaveEvent(user, oldCategory));
+                bungee.getPluginManager().callEvent(new CategoryJoinEvent(user, newCategory));
+                bungee.getPluginManager().callEvent(new CategorySwitchEvent(user, oldCategory, newCategory));
+            }
         }
 
         // TODO: Fix this?
@@ -246,7 +269,7 @@ public class ServerConnector extends PacketHandler
         // TODO: Move this to the connected() method of DownstreamBridge
         target.addPlayer( user );
         user.getPendingConnects().remove( target );
-        user.setServerJoinQueue( null );
+        user.setCategoryJoinQueue( null );
         user.setDimensionChange( false );
 
         user.setServer( server );
@@ -269,17 +292,17 @@ public class ServerConnector extends PacketHandler
     public void handle(Kick kick) throws Exception
     {
         ServerInfo def = user.updateAndGetNextServer( target );
-        ServerKickEvent event = new ServerKickEvent( user, target, ComponentSerializer.parse( kick.getMessage() ), def, ServerKickEvent.State.CONNECTING );
+        ServerKickEvent event = new ServerKickEvent( user, target, ComponentSerializer.parse( kick.getMessage() ), def.getCategory(), ServerKickEvent.State.CONNECTING );
         if ( event.getKickReason().toLowerCase().contains( "outdated" ) && def != null )
         {
             // Pre cancel the event if we are going to try another server
             event.setCancelled( true );
         }
         bungee.getPluginManager().callEvent( event );
-        if ( event.isCancelled() && event.getCancelServer() != null )
+        if ( event.isCancelled() && event.getCancelCategory() != null && event.getCancelCategory().getServer() != null )
         {
             obsolete = true;
-            user.connect( event.getCancelServer() );
+            user.connect( event.getCancelCategory().getServer() );
             throw CancelSendSignal.INSTANCE;
         }
 

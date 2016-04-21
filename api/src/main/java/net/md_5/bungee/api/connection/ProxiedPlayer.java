@@ -8,6 +8,7 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.Title;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.config.CategoryInfo;
 import net.md_5.bungee.api.config.ServerInfo;
 
 /**
@@ -47,6 +48,27 @@ public interface ProxiedPlayer extends Connection, CommandSender
      * @param message the message to send
      */
     public void sendMessage(ChatMessageType position, BaseComponent message);
+
+    /**
+     * Connects / transfers this user to the specified category, gracefully
+     * closing the current connection. Depending on the implementation, this method
+     * might return before the user has been connected.
+     *
+     * @param target the new server to connect to
+     */
+    void connectToCategory(CategoryInfo target);
+
+    /**
+     * Connects / transfers this user to the specified category, gracefully
+     * closing the current connection. Depending on the implementation, this method
+     * might return before the user has been connected.
+     *
+     * @param target the new category to connect to
+     * @param callback the method called when the connection is complete, or
+     * when an exception is encountered. The boolean parameter denotes success
+     * or failure.
+     */
+    void connectToCategory(CategoryInfo target, Callback<Boolean> callback);
 
     /**
      * Connects / transfers this user to the specified connection, gracefully
@@ -106,18 +128,18 @@ public interface ProxiedPlayer extends Connection, CommandSender
     void chat(String message);
 
     /**
-     * Get the server which this player will be sent to next time the log in.
+     * Get the category which this player will be sent to next time the log in.
      *
-     * @return the server, or null if default
+     * @return the category, or null if default
      */
-    ServerInfo getReconnectServer();
+    CategoryInfo getReconnectCategory();
 
     /**
-     * Set the server which this player will be sent to next time the log in.
+     * Set the category which this player will be sent to next time the log in.
      *
-     * @param server the server to set
+     * @param category the category to set
      */
-    void setReconnectServer(ServerInfo server);
+    void setReconnectCategory(CategoryInfo category);
 
     /**
      * Get this connection's UUID, if set.
