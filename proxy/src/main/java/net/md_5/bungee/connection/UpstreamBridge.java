@@ -83,7 +83,7 @@ public class UpstreamBridge extends PacketHandler
             
             CategoryInfo category = server.getCategory();
             category.getPlayers().remove(con);
-            category.putServer(server, server.getPlayers().size() - 1);
+            category.decrementServer(server);
             bungee.getPluginManager().callEvent(new CategoryLeaveEvent(con, category));
 
             con.getServer().disconnect( "Quitting" );

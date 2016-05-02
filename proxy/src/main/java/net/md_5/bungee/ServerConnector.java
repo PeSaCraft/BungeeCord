@@ -208,7 +208,7 @@ public class ServerConnector extends PacketHandler
             
             CategoryInfo newCategory = target.getCategory();
             newCategory.getPlayers().add(user);
-            newCategory.putServer(target, target.getPlayers().size() + 1);
+            newCategory.incrementServer(target);
             bungee.getPluginManager().callEvent(new CategoryJoinEvent(user, newCategory));
         } else
         {
@@ -248,8 +248,8 @@ public class ServerConnector extends PacketHandler
             CategoryInfo newCategory = server.getInfo().getCategory();
             
             // always update servers for load balancing
-            oldCategory.putServer(currentServer, currentServer.getPlayers().size() - 1);
-            newCategory.putServer(target, target.getPlayers().size() + 1);
+            oldCategory.decrementServer(currentServer);
+            newCategory.incrementServer(target);
             
             if (!oldCategory.equals(newCategory)) {
             	oldCategory.getPlayers().remove(user);

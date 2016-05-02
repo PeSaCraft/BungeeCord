@@ -57,6 +57,18 @@ public class CategoryInfo {
 	}
 	
 	@Synchronized("servers")
+    public void incrementServer(ServerInfo server) {
+		serversChanged = true;
+		this.servers.put(server, this.servers.get(server) + 1);
+	}
+	
+	@Synchronized("servers")
+    public void decrementServer(ServerInfo server) {
+		serversChanged = true;
+		this.servers.put(server, this.servers.get(server) - 1);
+	}
+	
+	@Synchronized("servers")
     public ServerInfo getServer() {
 		return getServers().iterator().next();
 	}
