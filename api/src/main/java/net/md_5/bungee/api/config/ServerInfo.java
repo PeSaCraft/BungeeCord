@@ -19,6 +19,12 @@ public interface ServerInfo
 		DIRECT;
 	}
 	
+	public static enum ServerStatus {
+		JOINABLE,
+		LOCKED,
+		SHUTTING_DOWN;
+	}
+	
     /**
      * Get the name of this server.
      *
@@ -76,6 +82,20 @@ public interface ServerInfo
      * @return the server's map
      */
     String getMap();
+    
+    /**
+     * Set the status of the server
+     * 
+     * @param serverStatus the server status to set
+     */
+    void setServerStatus(ServerStatus serverStatus);
+    
+    /**
+     * Returns the status of the server
+     * 
+     * @return the server's status
+     */
+    ServerStatus getServerStatus();
     
     /**
      * Whether the player can access this server. It will only return false when

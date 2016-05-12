@@ -48,6 +48,9 @@ public class BungeeServerInfo implements ServerInfo
     final private ServerType serverType;
     @Getter
     @Setter
+    private ServerStatus serverStatus;
+    @Getter
+    @Setter
     private String map;
     @Getter
     @Setter
@@ -61,7 +64,7 @@ public class BungeeServerInfo implements ServerInfo
     private final boolean restricted;
     @Getter
     private final Queue<DefinedPacket> packetQueue = new LinkedList<>();
-
+    
     @Synchronized("players")
     public void addPlayer(ProxiedPlayer player)
     {
