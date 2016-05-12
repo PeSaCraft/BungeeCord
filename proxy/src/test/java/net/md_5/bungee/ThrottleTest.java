@@ -11,7 +11,8 @@ public class ThrottleTest
     @Test
     public void testThrottle() throws InterruptedException, UnknownHostException
     {
-        ConnectionThrottle throttle = new ConnectionThrottle( 5 );
+    	int throttleMillis = 1000;
+        ConnectionThrottle throttle = new ConnectionThrottle( throttleMillis );
         InetAddress address;
 
         try
@@ -25,7 +26,7 @@ public class ThrottleTest
         Assert.assertFalse( "Address should not be throttled", throttle.throttle( address ) );
         Assert.assertTrue( "Address should be throttled", throttle.throttle( address ) );
 
-        Thread.sleep( 15 );
+        Thread.sleep( throttleMillis * 2 );
         Assert.assertFalse( "Address should not be throttled", throttle.throttle( address ) );
     }
 }
