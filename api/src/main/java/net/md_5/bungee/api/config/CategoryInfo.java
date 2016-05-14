@@ -2,6 +2,7 @@ package net.md_5.bungee.api.config;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -70,7 +71,8 @@ public class CategoryInfo {
 	
 	@Synchronized("servers")
     public ServerInfo getServer() {
-		return getServers().iterator().next();
+		Iterator<ServerInfo> servers = getServers().iterator();
+		return servers.hasNext() ? servers.next() : null;
 	}
 	
 	@Synchronized("servers")
