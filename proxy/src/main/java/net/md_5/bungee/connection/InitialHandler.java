@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.URLEncoder;
+import java.nio.channels.IllegalSelectorException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
@@ -505,10 +506,12 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                             	category = AbstractReconnectHandler.getForcedHost( InitialHandler.this );
                             if ( category == null )
                             	category = bungee.getCategeoryInfo(listener.getDefaultCategory() );
-
                             
-                            userCon.connectToCategory( category, null, true );
-
+                            if (category.getServer() != null)
+                            	userCon.connectToCategory( category, null, true );
+                            else
+                                disconnect( bungee.getTranslation( "fallback_kick", IllegalSelectorException.class.getName() ) );
+                            
                             thisState = State.FINISHED;
                         }
                     }
