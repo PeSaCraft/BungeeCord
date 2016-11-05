@@ -58,15 +58,22 @@ public class CategoryInfo {
 	}
 	
 	@Synchronized("servers")
+	public int getPlayers(ServerInfo server) {
+		Integer players = this.servers.get(server);
+		return players != null ? players : 0;
+	}
+	
+	@Synchronized("servers")
     public void incrementServer(ServerInfo server) {
 		serversChanged = true;
-		this.servers.put(server, this.servers.get(server) + 1);
+		
+		this.servers.put(server, getPlayers(server) + 1);
 	}
 	
 	@Synchronized("servers")
     public void decrementServer(ServerInfo server) {
 		serversChanged = true;
-		this.servers.put(server, this.servers.get(server) - 1);
+		this.servers.put(server, getPlayers(server) - 1);
 	}
 	
 	@Synchronized("servers")

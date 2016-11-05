@@ -2,10 +2,12 @@ package net.md_5.bungee.api.config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.md_5.bungee.api.config.ServerInfo.ServerType;
 import net.md_5.bungee.util.MapUtils;
 
 public class LobbyGameCategoryInfo extends CategoryInfo {
@@ -103,9 +105,43 @@ public class LobbyGameCategoryInfo extends CategoryInfo {
 	 * @return the found server or null if none exists
 	 */
 	synchronized public ServerInfo getGameServer(String map) {
-		return getServers(map).keySet().iterator().next();
+		Iterator<ServerInfo> iterator = getServers(map).keySet().iterator();
+		return iterator.hasNext() ? iterator.next() : null;
 	}
 	
+	@Override
+	public void incrementServer(ServerInfo server) {
+		if (server.getCategory() != this)
+			throw new IllegalArgumentException("The servers category doesn't match! Expected: " + this.getName() + " Given: " + server.getCategory().getName());
+		
+		if (server.getServerType() == ServerType.GAME) {
+			Integer players = getServers(server.getMap()).get(server);
+			
+			if (players == null)
+				return;
+			players++;
+			getServers(server.getMap()).put(server, players);
+		}
+		else
+			super.incrementServer(server);
+	}
+	
+	@Override
+	public void decrementServer(ServerInfo server) {
+		if (server.getCategory() != this)
+			throw new IllegalArgumentException("The servers category doesn't match! Expected: " + this.getName() + " Given: " + server.getCategory().getName());
+		
+		if (server.getServerType() == ServerType.GAME) {
+			Integer players = getServers(server.getMap()).get(server);
+			
+			if (players == null)
+				return;
+			players--;
+			getServers(server.getMap()).put(server, players);
+		}
+		else
+			super.decrementServer(server);
+	}
 	@Override
 	public String dump() {
 		String msg = super.dump();
